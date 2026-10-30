@@ -1,13 +1,11 @@
-﻿
-using FoodMenuManagement.Data;
+﻿using FoodMenuManagement.Data;
+using FoodMenuManagement.Menus;
 using FoodMenuManagement.Repositories;
 using FoodMenuManagement.Services;
-using FoodMenuManagement.Menus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -25,12 +23,15 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Register repository
+// Register repositories
 builder.Services.AddScoped<FoodItemRepository>();
+builder.Services.AddScoped<AuditLogRepository>();
 
-// Register service
+// Register services
 builder.Services.AddScoped<FoodItemService>();
+builder.Services.AddScoped<AuditLogService>();
 
+// Register menu
 builder.Services.AddScoped<FoodMenu>();
 
 using var host = builder.Build();
