@@ -2,10 +2,12 @@
 using FoodMenuManagement.Data;
 using FoodMenuManagement.Repositories;
 using FoodMenuManagement.Services;
+using FoodMenuManagement.Menus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -29,27 +31,13 @@ builder.Services.AddScoped<FoodItemRepository>();
 // Register service
 builder.Services.AddScoped<FoodItemService>();
 
-// Build application
+builder.Services.AddScoped<FoodMenu>();
+
 using var host = builder.Build();
 
-// Create dependency injection scope
 using var scope = host.Services.CreateScope();
 
-// Get service automatically from DI
-var service =
-    scope.ServiceProvider.GetRequiredService<FoodItemService>();
+var menu = scope.ServiceProvider
+    .GetRequiredService<FoodMenu>();
 
-Console.WriteLine("==================================");
-Console.WriteLine("   FOOD MENU MANAGEMENT SYSTEM");
-Console.WriteLine("==================================");
-Console.WriteLine("Dependency Injection configured!");
-
-// Test database connection
-bool canConnect = await scope.ServiceProvider
-    .GetRequiredService<AppDbContext>()
-    .Database.CanConnectAsync();
-
-Console.WriteLine(
-    canConnect
-        ? "Database connection successful."
-        : "Database connection failed.");
+await menu.RunAsync();
