@@ -26,4 +26,8 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<FoodItem> FoodItems => Set<FoodItem>();
+
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+
 }
