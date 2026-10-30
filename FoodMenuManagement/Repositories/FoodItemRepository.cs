@@ -79,4 +79,24 @@ public class FoodItemRepository
             (excludeId == null || item.Id != excludeId));
     }
 
+    public async Task<List<FoodItem>> GetFilteredAsync(
+    string? category,
+    bool availableOnly)
+    {
+        var query = _context.FoodItems.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            query = query.Where(item =>
+                item.Category.ToLower() == category.Trim().ToLower());
+        }
+
+        if (availableOnly)
+        {
+            query = query.Where(item => item.IsAvailable);
+        }
+
+        return await query.ToListAsync();
+    }
+
 }

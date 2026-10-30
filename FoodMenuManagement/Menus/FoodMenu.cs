@@ -13,11 +13,37 @@ public class FoodMenu
         _service = service;
     }
 
+    private async Task FilterFoodItemsAsync()
+    {
+        Console.Write("Enter category (leave blank for all): ");
+        string? category = Console.ReadLine();
+
+        Console.Write("Show only available items? (y/n): ");
+        string? choice = Console.ReadLine();
+
+        bool availableOnly = choice?.Trim().Equals(
+            "y",
+            StringComparison.OrdinalIgnoreCase) == true;
+
+        var foodItems = await _service.GetFilteredFoodItemsAsync(category,availableOnly);
+
+        if (foodItems.Count == 0)
+        {
+            Console.WriteLine("No matching food items found.");
+            return;
+        }
+
+        Console.WriteLine("\nFiltered Food Items:");
+
+        foreach (var item in foodItems)
+        {
+            DisplayFoodItem(item);
+        }
+    }
     public async Task RunAsync()
     {
-        bool exit = false;
 
-        while (!exit)
+        while (true)
         {
             Console.Clear();
 
@@ -29,7 +55,8 @@ public class FoodMenu
             Console.WriteLine("3. View Food Item By ID");
             Console.WriteLine("4. Update Food Item");
             Console.WriteLine("5. Delete Food Item");
-            Console.WriteLine("6. Exit");
+            Console.WriteLine("6. Filter Food Items");
+            Console.WriteLine("7. Exit");
             Console.WriteLine("==================================");
 
             Console.Write("Enter your choice: ");
@@ -60,9 +87,12 @@ public class FoodMenu
                         break;
 
                     case "6":
-                        exit = true;
-                        Console.WriteLine("Thank you for using the application!");
+                        await FilterFoodItemsAsync();
                         break;
+
+                    case "7":
+                        Console.WriteLine("Thank you for using Food Menu Management!");
+                        return;
 
                     default:
                         Console.WriteLine("Invalid choice. Try again.");
@@ -78,11 +108,8 @@ public class FoodMenu
                 Console.WriteLine($"Operation failed: {ex.Message}");
             }
 
-            if (!exit)
-            {
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
-            }
         }
     }
 
@@ -282,6 +309,7 @@ public class FoodMenu
             deleted ? "Food item deleted successfully."
                     : "Food item could not be deleted.");
     }
+
 
     private static void DisplayFoodItem(FoodItem item)
     {

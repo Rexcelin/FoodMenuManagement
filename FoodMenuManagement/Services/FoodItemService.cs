@@ -100,4 +100,16 @@ public class FoodItemService
             throw new ArgumentException(
                 "Food price must be greater than zero.");
     }
+
+    public async Task<List<FoodItem>> GetFilteredFoodItemsAsync(
+    string? category,
+    bool availableOnly)
+    {
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            category = category.Trim();
+        }
+
+        return await _repository.GetFilteredAsync(category, availableOnly);
+    }
 }
