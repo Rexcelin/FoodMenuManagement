@@ -8,18 +8,31 @@ namespace FoodMenuManagement.Migrations
     public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
-
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // FoodItems table already exists in the database.
-            // This migration records the existing schema as the baseline.
+            migrationBuilder.CreateTable(
+                name: "FoodItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FoodItems", x => x.Id);
+                });
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Intentionally empty.
-            // Do not drop the existing FoodItems table.
+            migrationBuilder.DropTable(
+                name: "FoodItems");
         }
-
     }
 }
