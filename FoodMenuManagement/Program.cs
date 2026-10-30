@@ -2,6 +2,7 @@
 using FoodMenuManagement.Data;
 using FoodMenuManagement.Models;
 using FoodMenuManagement.Repositories;
+using FoodMenuManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
 var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -12,49 +13,81 @@ var options = new DbContextOptionsBuilder<AppDbContext>()
 await using var context = new AppDbContext(options);
 
 var repository = new FoodItemRepository(context);
+var service = new FoodItemService(repository);
 
-// 1. ADD
-var foodItem = new FoodItem
+// Test 1: Valid food item
+var validItem = new FoodItem
 {
-    Name = "Veg Burger",
-    Category = "Fast Food",
-    Description = "Fresh vegetable burger",
-    Price = 120,
+    Name = "Paneer Pizza",
+    Category = "Pizza",
+    Description = "Fresh paneer pizza",
+    Price = 180,
     IsAvailable = true
 };
 
-int id = await repository.AddAsync(foodItem);
-Console.WriteLine($"Added successfully. ID: {id}");
-
-// 2. VIEW ALL
-var items = await repository.GetAllAsync();
-
-Console.WriteLine("\nAll Food Items:");
-
-foreach (var item in items)
+try
 {
-    Console.WriteLine(
-        $"{item.Id} | {item.Name} | {item.Category} | {item.Price}");
+    int id = await service.AddFoodItemAsync(validItem);
+    Console.WriteLine($"Valid item added successfully. ID: {id}");
+
+    // Clean up the test record
+    await repository.DeleteAsync(id);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation error: {ex.Message}");
 }
 
-// 3. VIEW BY ID
-var selectedItem = await repository.GetByIdAsync(id);
-
-Console.WriteLine(
-    $"\nSelected Item: {selectedItem?.Name ?? "Not found"}");
-
-// 4. UPDATE
-if (selectedItem != null)
+// Test 2: Empty food name
+var invalidNameItem = new FoodItem
 {
-    selectedItem.Price = 150;
-    selectedItem.Description = "Updated vegetable burger";
+    Name = "",
+    Category = "Snacks",
+    Price = 50,
+    IsAvailable = true
+};
 
-    bool updated = await repository.UpdateAsync(selectedItem);
-
-    Console.WriteLine($"Updated: {updated}");
+try
+{
+    await service.AddFoodItemAsync(invalidNameItem);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Test 2: {ex.Message}");
 }
 
-// 5. DELETE
-bool deleted = await repository.DeleteAsync(id);
+// Test 3: Empty category
+var invalidCategoryItem = new FoodItem
+{
+    Name = "Burger",
+    Category = " ",
+    Price = 100,
+    IsAvailable = true
+};
 
-Console.WriteLine($"Deleted: {deleted}");
+try
+{
+    await service.AddFoodItemAsync(invalidCategoryItem);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Test 3: {ex.Message}");
+}
+
+// Test 4: Invalid price
+var invalidPriceItem = new FoodItem
+{
+    Name = "Sandwich",
+    Category = "Snacks",
+    Price = 0,
+    IsAvailable = true
+};
+
+try
+{
+    await service.AddFoodItemAsync(invalidPriceItem);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Test 4: {ex.Message}");
+}
