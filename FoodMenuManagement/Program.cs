@@ -17,42 +17,51 @@ var service = new FoodItemService(repository);
 
 try
 {
-    var firstItem = new FoodItem
+    // Add
+    var item = new FoodItem
     {
-        Name = "Chicken Burger",
-        Category = "Fast Food",
-        Price = 150,
+        Name = "Paneer Roll",
+        Category = "Snacks",
+        Description = "Fresh paneer roll",
+        Price = 90,
         IsAvailable = true
     };
 
-    int firstId = await service.AddFoodItemAsync(firstItem);
-    Console.WriteLine($"First item added. ID: {firstId}");
+    int id = await service.AddFoodItemAsync(item);
+    Console.WriteLine($"Added item. ID: {id}");
 
-    var duplicateItem = new FoodItem
-    {
-        Name = "chicken burger",
-        Category = "Fast Food",
-        Price = 180,
-        IsAvailable = true
-    };
+    // View all
+    var items = await service.GetAllFoodItemsAsync();
 
-    try
+    Console.WriteLine("\nFood Items:");
+
+    foreach (var food in items)
     {
-        await service.AddFoodItemAsync(duplicateItem);
-    }
-    catch (ArgumentException ex)
-    {
-        Console.WriteLine($"Duplicate rejected: {ex.Message}");
+        Console.WriteLine(
+            $"{food.Id} | {food.Name} | {food.Price}");
     }
 
-    // Update the first item without changing its name.
-    firstItem.Price = 160;
+    // View by ID
+    var selected = await service.GetFoodItemByIdAsync(id);
 
-    bool updated = await service.UpdateFoodItemAsync(firstItem);
-    Console.WriteLine($"Same item updated: {updated}");
+    Console.WriteLine(
+        $"\nSelected: {selected?.Name ?? "Not found"}");
 
-    // Clean up the test record.
-    await repository.DeleteAsync(firstId);
+    // Update
+    if (selected != null)
+    {
+        selected.Price = 110;
+
+        bool updated =
+            await service.UpdateFoodItemAsync(selected);
+
+        Console.WriteLine($"Updated: {updated}");
+    }
+
+    // Delete
+    bool deleted = await service.DeleteFoodItemAsync(id);
+
+    Console.WriteLine($"Deleted: {deleted}");
 }
 catch (Exception ex)
 {

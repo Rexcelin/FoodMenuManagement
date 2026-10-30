@@ -13,53 +13,91 @@ public class FoodItemService
         _repository = repository;
     }
 
-
+    // Add food item
     public async Task<int> AddFoodItemAsync(FoodItem foodItem)
     {
         ValidateFoodItem(foodItem);
 
-        bool exists = await _repository.ExistsByNameAsync(
-            foodItem.Name.Trim());
+        string name = foodItem.Name.Trim();
+
+        bool exists = await _repository.ExistsByNameAsync(name);
 
         if (exists)
+        {
             throw new ArgumentException(
                 "A food item with this name already exists.");
+        }
 
-        foodItem.Name = foodItem.Name.Trim();
+        foodItem.Name = name;
 
         return await _repository.AddAsync(foodItem);
     }
 
+    // Get all food items
+    public async Task<List<FoodItem>> GetAllFoodItemsAsync()
+    {
+        return await _repository.GetAllAsync();
+    }
+
+    // Get food item by ID
+    public async Task<FoodItem?> GetFoodItemByIdAsync(int id)
+    {
+        if (id <= 0)
+            throw new ArgumentException("Invalid food item ID.");
+
+        return await _repository.GetByIdAsync(id);
+    }
+
+    // Update food item
     public async Task<bool> UpdateFoodItemAsync(FoodItem foodItem)
     {
         ValidateFoodItem(foodItem);
 
+        if (foodItem.Id <= 0)
+            throw new ArgumentException("Invalid food item ID.");
+
+        string name = foodItem.Name.Trim();
+
         bool exists = await _repository.ExistsByNameAsync(
-            foodItem.Name.Trim(),
+            name,
             foodItem.Id);
 
         if (exists)
+        {
             throw new ArgumentException(
                 "Another food item with this name already exists.");
+        }
 
-        foodItem.Name = foodItem.Name.Trim();
+        foodItem.Name = name;
 
         return await _repository.UpdateAsync(foodItem);
     }
 
+    // Delete food item
+    public async Task<bool> DeleteFoodItemAsync(int id)
+    {
+        if (id <= 0)
+            throw new ArgumentException("Invalid food item ID.");
 
+        return await _repository.DeleteAsync(id);
+    }
+
+    // Validation
     private static void ValidateFoodItem(FoodItem foodItem)
     {
         if (foodItem == null)
             throw new ArgumentNullException(nameof(foodItem));
 
         if (string.IsNullOrWhiteSpace(foodItem.Name))
-            throw new ArgumentException("Food name cannot be empty.");
+            throw new ArgumentException(
+                "Food name cannot be empty.");
 
         if (string.IsNullOrWhiteSpace(foodItem.Category))
-            throw new ArgumentException("Food category cannot be empty.");
+            throw new ArgumentException(
+                "Food category cannot be empty.");
 
         if (foodItem.Price <= 0)
-            throw new ArgumentException("Food price must be greater than zero.");
+            throw new ArgumentException(
+                "Food price must be greater than zero.");
     }
 }
