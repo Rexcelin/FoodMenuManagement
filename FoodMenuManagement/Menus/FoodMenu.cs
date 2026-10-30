@@ -8,10 +8,14 @@ namespace FoodMenuManagement.Menus;
 public class FoodMenu
 {
     private readonly FoodItemService _service;
+    private readonly AuditLogService _auditLogService;
 
-    public FoodMenu(FoodItemService service)
+    public FoodMenu(
+    FoodItemService service,
+    AuditLogService auditLogService)
     {
         _service = service;
+        _auditLogService = auditLogService;
     }
 
     private async Task FilterFoodItemsAsync()
@@ -57,7 +61,8 @@ public class FoodMenu
             Console.WriteLine("4. Update Food Item");
             Console.WriteLine("5. Delete Food Item");
             Console.WriteLine("6. Filter Food Items");
-            Console.WriteLine("7. Exit");
+            Console.WriteLine("7. View Audit Logs");
+            Console.WriteLine("8. Exit");
             Console.WriteLine("==================================");
 
             Console.Write("Enter your choice: ");
@@ -92,6 +97,10 @@ public class FoodMenu
                         break;
 
                     case "7":
+                        await ViewAuditLogsAsync();
+                        break;
+
+                    case "8":
                         Console.WriteLine("Thank you for using Food Menu Management!");
                         return;
 
@@ -322,5 +331,32 @@ public class FoodMenu
         Console.WriteLine($"Price       : {item.Price:F2}");
         Console.WriteLine($"Available   : {(item.IsAvailable ? "Yes" : "No")}");
         Console.WriteLine("----------------------------------");
+    }
+
+    private async Task ViewAuditLogsAsync()
+    {
+        Console.WriteLine("\n========== AUDIT LOG HISTORY ==========");
+
+        var logs = await _auditLogService.GetAllAuditLogsAsync();
+
+        if (logs.Count == 0)
+        {
+            Console.WriteLine("No audit records found.");
+            return;
+        }
+
+        foreach (var log in logs)
+        {
+            Console.WriteLine("---------------------------------------");
+            Console.WriteLine($"Audit ID    : {log.AuditLogId}");
+            Console.WriteLine($"Entity      : {log.EntityName}");
+            Console.WriteLine($"Entity ID   : {log.EntityId}");
+            Console.WriteLine($"Action      : {log.Action}");
+            Console.WriteLine($"Details     : {log.Details}");
+            Console.WriteLine($"Old Values  : {log.OldValues ?? "N/A"}");
+            Console.WriteLine($"New Values  : {log.NewValues ?? "N/A"}");
+            Console.WriteLine($"Performed At: {log.PerformedAt:yyyy-MM-dd HH:mm:ss} UTC");
+            Console.WriteLine("---------------------------------------");
+        }
     }
 }
