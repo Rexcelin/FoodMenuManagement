@@ -1,6 +1,7 @@
 ﻿
 using FoodMenuManagement.Models;
 using FoodMenuManagement.Services;
+using FoodMenuManagement.Helper;
 
 namespace FoodMenuManagement.Menus;
 
@@ -105,10 +106,10 @@ public class FoodMenu
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Operation failed: {ex.Message}");
+                Console.WriteLine(DatabaseErrorHandler.GetErrorMessage(ex));
             }
 
-                Console.WriteLine("\nPress any key to continue...");
+            Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
         }
     }
