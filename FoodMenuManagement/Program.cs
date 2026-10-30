@@ -1,69 +1,55 @@
 ﻿
 using FoodMenuManagement.Data;
-using FoodMenuManagement.Models;
 using FoodMenuManagement.Repositories;
 using FoodMenuManagement.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-var options = new DbContextOptionsBuilder<AppDbContext>()
-    .UseSqlServer(
-        "Server=.\\SQLEXPRESS;Database=FoodMenuDB;Trusted_Connection=True;TrustServerCertificate=True;")
-    .Options;
+var builder = Host.CreateApplicationBuilder(args);
 
-await using var context = new AppDbContext(options);
+// Read connection string from appsettings.json
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
 
-var repository = new FoodItemRepository(context);
-var service = new FoodItemService(repository);
-
-try
+if (string.IsNullOrWhiteSpace(connectionString))
 {
-    // Add
-    var item = new FoodItem
-    {
-        Name = "Paneer Roll",
-        Category = "Snacks",
-        Description = "Fresh paneer roll",
-        Price = 90,
-        IsAvailable = true
-    };
-
-    int id = await service.AddFoodItemAsync(item);
-    Console.WriteLine($"Added item. ID: {id}");
-
-    // View all
-    var items = await service.GetAllFoodItemsAsync();
-
-    Console.WriteLine("\nFood Items:");
-
-    foreach (var food in items)
-    {
-        Console.WriteLine(
-            $"{food.Id} | {food.Name} | {food.Price}");
-    }
-
-    // View by ID
-    var selected = await service.GetFoodItemByIdAsync(id);
-
-    Console.WriteLine(
-        $"\nSelected: {selected?.Name ?? "Not found"}");
-
-    // Update
-    if (selected != null)
-    {
-        selected.Price = 110;
-
-        bool updated =
-            await service.UpdateFoodItemAsync(selected);
-
-        Console.WriteLine($"Updated: {updated}");
-    }
-
-    // Delete
-    bool deleted = await service.DeleteFoodItemAsync(id);
-
-    Console.WriteLine($"Deleted: {deleted}");
+    throw new InvalidOperationException(
+        "Database connection string is missing.");
 }
-catch (Exception ex)
-{
-    Console.WriteLine($"Error: {ex.Message}");
-}
+
+// Register database context
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Register repository
+builder.Services.AddScoped<FoodItemRepository>();
+
+// Register service
+builder.Services.AddScoped<FoodItemService>();
+
+// Build application
+using var host = builder.Build();
+
+// Create dependency injection scope
+using var scope = host.Services.CreateScope();
+
+// Get service automatically from DI
+var service =
+    scope.ServiceProvider.GetRequiredService<FoodItemService>();
+
+Console.WriteLine("==================================");
+Console.WriteLine("   FOOD MENU MANAGEMENT SYSTEM");
+Console.WriteLine("==================================");
+Console.WriteLine("Dependency Injection configured!");
+
+// Test database connection
+bool canConnect = await scope.ServiceProvider
+    .GetRequiredService<AppDbContext>()
+    .Database.CanConnectAsync();
+
+Console.WriteLine(
+    canConnect
+        ? "Database connection successful."
+        : "Database connection failed.");
