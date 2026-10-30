@@ -15,79 +15,46 @@ await using var context = new AppDbContext(options);
 var repository = new FoodItemRepository(context);
 var service = new FoodItemService(repository);
 
-// Test 1: Valid food item
-var validItem = new FoodItem
-{
-    Name = "Paneer Pizza",
-    Category = "Pizza",
-    Description = "Fresh paneer pizza",
-    Price = 180,
-    IsAvailable = true
-};
-
 try
 {
-    int id = await service.AddFoodItemAsync(validItem);
-    Console.WriteLine($"Valid item added successfully. ID: {id}");
+    var firstItem = new FoodItem
+    {
+        Name = "Chicken Burger",
+        Category = "Fast Food",
+        Price = 150,
+        IsAvailable = true
+    };
 
-    // Clean up the test record
-    await repository.DeleteAsync(id);
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Validation error: {ex.Message}");
-}
+    int firstId = await service.AddFoodItemAsync(firstItem);
+    Console.WriteLine($"First item added. ID: {firstId}");
 
-// Test 2: Empty food name
-var invalidNameItem = new FoodItem
-{
-    Name = "",
-    Category = "Snacks",
-    Price = 50,
-    IsAvailable = true
-};
+    var duplicateItem = new FoodItem
+    {
+        Name = "chicken burger",
+        Category = "Fast Food",
+        Price = 180,
+        IsAvailable = true
+    };
 
-try
-{
-    await service.AddFoodItemAsync(invalidNameItem);
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Test 2: {ex.Message}");
-}
+    try
+    {
+        await service.AddFoodItemAsync(duplicateItem);
+    }
+    catch (ArgumentException ex)
+    {
+        Console.WriteLine($"Duplicate rejected: {ex.Message}");
+    }
 
-// Test 3: Empty category
-var invalidCategoryItem = new FoodItem
-{
-    Name = "Burger",
-    Category = " ",
-    Price = 100,
-    IsAvailable = true
-};
+    // Update the first item without changing its name.
+    firstItem.Price = 160;
 
-try
-{
-    await service.AddFoodItemAsync(invalidCategoryItem);
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Test 3: {ex.Message}");
-}
+    bool updated = await service.UpdateFoodItemAsync(firstItem);
+    Console.WriteLine($"Same item updated: {updated}");
 
-// Test 4: Invalid price
-var invalidPriceItem = new FoodItem
-{
-    Name = "Sandwich",
-    Category = "Snacks",
-    Price = 0,
-    IsAvailable = true
-};
-
-try
-{
-    await service.AddFoodItemAsync(invalidPriceItem);
+    // Clean up the test record.
+    await repository.DeleteAsync(firstId);
 }
-catch (ArgumentException ex)
+catch (Exception ex)
 {
-    Console.WriteLine($"Test 4: {ex.Message}");
+    Console.WriteLine($"Error: {ex.Message}");
 }

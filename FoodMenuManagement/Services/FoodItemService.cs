@@ -13,9 +13,19 @@ public class FoodItemService
         _repository = repository;
     }
 
+
     public async Task<int> AddFoodItemAsync(FoodItem foodItem)
     {
         ValidateFoodItem(foodItem);
+
+        bool exists = await _repository.ExistsByNameAsync(
+            foodItem.Name.Trim());
+
+        if (exists)
+            throw new ArgumentException(
+                "A food item with this name already exists.");
+
+        foodItem.Name = foodItem.Name.Trim();
 
         return await _repository.AddAsync(foodItem);
     }
@@ -24,8 +34,19 @@ public class FoodItemService
     {
         ValidateFoodItem(foodItem);
 
+        bool exists = await _repository.ExistsByNameAsync(
+            foodItem.Name.Trim(),
+            foodItem.Id);
+
+        if (exists)
+            throw new ArgumentException(
+                "Another food item with this name already exists.");
+
+        foodItem.Name = foodItem.Name.Trim();
+
         return await _repository.UpdateAsync(foodItem);
     }
+
 
     private static void ValidateFoodItem(FoodItem foodItem)
     {
