@@ -1,32 +1,58 @@
-﻿# Food Menu Management System
+﻿
+# Food Menu Management System
 
 A console-based Food Menu Management System developed using C#, .NET 10, Entity Framework Core, and SQL Server Express.
 
-## Features
-
-- Add new food items.
-- View all food items.
-- Search food items by ID.
-- Update existing food items.
-- Delete food items.
-- Filter food items by category.
-- Display only available food items.
-- Combine category and availability filters.
-- Validate required fields and positive prices.
-- Prevent duplicate food item names.
-- Handle database errors.
-- Use asynchronous database operations.
-- Dependency Injection for application services.
+The application supports food item CRUD operations, filtering, validation, database error handling, and automatic audit logging.
 
 ## Technologies Used
 
 - C#
 - .NET 10
-- Entity Framework Core
+- Entity Framework Core 10
 - SQL Server Express
 - LINQ
 - Dependency Injection
+- Asynchronous Programming
 - Git and GitHub
+
+## Project Features
+
+### 1. Food Item Management
+- Add new food items
+- View all food items
+- View food item by ID
+- Update food item details
+- Delete food items
+
+### 2. Filtering
+- Filter food items by category
+- Filter available food items
+- Combine category and availability filters
+
+### 3. Validation
+- Food item name is required
+- Category is required
+- Price must be greater than zero
+- Prevent duplicate food item names
+- Validate food item IDs
+
+### 4. Audit Logging
+- Automatically record food item creation
+- Automatically record food item updates
+- Automatically record food item deletions
+- Store old and new values for relevant operations
+- Record transaction date and time
+- View all audit logs
+- View audit history by food item ID
+
+### 5. Database and Error Handling
+- SQL Server database integration
+- Entity Framework Core migrations
+- Asynchronous database operations
+- Dependency Injection
+- Database error handling
+- Transaction-based audit logging
 
 ## Project Structure
 
@@ -36,122 +62,75 @@ FoodMenuManagement/
 ├── Data/
 │   └── AppDbContext.cs
 │
-├── docs/
-│   └── 01-project-overview.md
-│
 ├── Helper/
 │   └── DatabaseErrorHandler.cs
 │
 ├── Menus/
 │   └── FoodMenu.cs
 │
-├── Migrations/
-│
 ├── Models/
-│   └── FoodItem.cs
+│   ├── FoodItem.cs
+│   └── AuditLog.cs
 │
 ├── Repositories/
-│   └── FoodItemRepository.cs
+│   ├── FoodItemRepository.cs
+│   └── AuditLogRepository.cs
 │
 ├── Services/
-│   └── FoodItemService.cs
+│   ├── FoodItemService.cs
+│   └── AuditLogService.cs
+│
+├── Migrations/
+│
+├── docs/
 │
 ├── Program.cs
 ├── appsettings.json
 └── README.md
 ```
 
-## Food Item Properties
+## Audit Log Details
 
-| Property | Data Type | Description |
-|---|---|---|
-| Id | int | Unique food item ID |
-| Name | string | Food item name |
-| Category | string | Food category |
-| Description | string? | Optional description |
-| Price | decimal | Food item price |
-| IsAvailable | bool | Availability status |
+The AuditLog table stores:
 
-## Database Configuration
+| Field | Description |
+|---|---|
+| AuditLogId | Unique audit record ID |
+| EntityName | Name of the affected entity |
+| EntityId | ID of the affected food item |
+| Action | CREATE, UPDATE, or DELETE |
+| Details | Description of the operation |
+| OldValues | Previous food item data |
+| NewValues | Updated or newly created data |
+| PerformedAt | Date and time of the operation |
 
-This project uses SQL Server Express.
+Audit records are saved within the same database transaction as the corresponding food item operation. If an operation fails, its audit record is rolled back as well.
 
-Update the `DefaultConnection` value in `appsettings.json` to match your SQL Server instance:
+## Database Setup
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.\\SQLEXPRESS;Database=FoodMenuDB;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-```
+1. Install SQL Server Express.
+2. Update the connection string in `appsettings.json`.
+3. Open the project in Visual Studio.
+4. Run the database migrations.
 
-## Installation and Setup
-
-### 1. Clone the repository
-
-```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
-```
-
-### 2. Open the project folder
-
-```bash
-cd FoodMenuManagement
-```
-
-### 3. Restore dependencies
+## Run the Application
 
 ```bash
 dotnet restore
-```
-
-### 4. Apply database migrations
-
-```bash
-dotnet ef database update
-```
-
-### 5. Run the application
-
-```bash
+dotnet build
 dotnet run
 ```
 
-## Application Menu
+## Learning Outcomes
 
-1. Add Food Item
-2. View All Food Items
-3. View Food Item By ID
-4. Update Food Item
-5. Delete Food Item
-6. Filter Food Items
-7. Exit
-
-## Architecture
-
-The application follows a layered architecture:
-
-- **Models:** Defines the FoodItem entity.
-- **Data:** Contains the Entity Framework Core database context.
-- **Repositories:** Handles database CRUD and filtering operations.
-- **Services:** Contains business logic and validation.
-- **Menus:** Provides the interactive console interface.
-- **Helper:** Provides database error-handling utilities.
-
-## Learning Objectives
-
-This project demonstrates practical usage of:
-
-- Entity Framework Core
-- SQL Server database integration
-- CRUD operations
-- LINQ filtering
-- Asynchronous programming
-- Dependency Injection
-- Repository and Service patterns
-- Input validation
-- Exception handling
+- Implemented CRUD operations using EF Core.
+- Used the Repository and Service patterns.
+- Configured Dependency Injection.
+- Implemented asynchronous programming.
+- Applied data validation.
+- Used LINQ for filtering.
+- Implemented database transactions.
+- Designed an audit logging mechanism.
 
 ## Author
 
