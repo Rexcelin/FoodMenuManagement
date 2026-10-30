@@ -62,7 +62,8 @@ public class FoodMenu
             Console.WriteLine("5. Delete Food Item");
             Console.WriteLine("6. Filter Food Items");
             Console.WriteLine("7. View Audit Logs");
-            Console.WriteLine("8. Exit");
+            Console.WriteLine("8. View Audit Logs by Food Item ID");
+            Console.WriteLine("9. Exit");
             Console.WriteLine("==================================");
 
             Console.Write("Enter your choice: ");
@@ -101,6 +102,10 @@ public class FoodMenu
                         break;
 
                     case "8":
+                        await ViewAuditLogsByFoodItemIdAsync();
+                        break;
+
+                    case "9":
                         Console.WriteLine("Thank you for using Food Menu Management!");
                         return;
 
@@ -351,6 +356,39 @@ public class FoodMenu
             Console.WriteLine($"Audit ID    : {log.AuditLogId}");
             Console.WriteLine($"Entity      : {log.EntityName}");
             Console.WriteLine($"Entity ID   : {log.EntityId}");
+            Console.WriteLine($"Action      : {log.Action}");
+            Console.WriteLine($"Details     : {log.Details}");
+            Console.WriteLine($"Old Values  : {log.OldValues ?? "N/A"}");
+            Console.WriteLine($"New Values  : {log.NewValues ?? "N/A"}");
+            Console.WriteLine($"Performed At: {log.PerformedAt:yyyy-MM-dd HH:mm:ss} UTC");
+            Console.WriteLine("---------------------------------------");
+        }
+    }
+
+    private async Task ViewAuditLogsByFoodItemIdAsync()
+    {
+        Console.Write("\nEnter Food Item ID: ");
+
+        if (!int.TryParse(Console.ReadLine(), out int foodItemId) || foodItemId <= 0)
+        {
+            Console.WriteLine("Please enter a valid Food Item ID.");
+            return;
+        }
+
+        var logs = await _auditLogService.GetFoodItemAuditLogsAsync(foodItemId);
+
+        if (logs.Count == 0)
+        {
+            Console.WriteLine("No audit history found for this food item.");
+            return;
+        }
+
+        Console.WriteLine($"\n===== AUDIT HISTORY FOR FOOD ITEM {foodItemId} =====");
+
+        foreach (var log in logs)
+        {
+            Console.WriteLine("---------------------------------------");
+            Console.WriteLine($"Audit ID    : {log.AuditLogId}");
             Console.WriteLine($"Action      : {log.Action}");
             Console.WriteLine($"Details     : {log.Details}");
             Console.WriteLine($"Old Values  : {log.OldValues ?? "N/A"}");
